@@ -20,7 +20,6 @@ class AuthSettings(BaseModel):
 
 
 class MongoDbSettings(BaseModel):
-    DB_URL: str
     DB_NAME: str
     DB_PASSWORD: str
     DB_USERNAME: str

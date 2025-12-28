@@ -93,15 +93,18 @@ async def githubCallback(
                 status_code=status.HTTP_403_FORBIDDEN,
                 detail="GitHub account does not have a verified email address.",
             )
-        newUser = UserInDb(
-            _id=githubUser.id,
-            email=primaryEmail,
-            githubUsername=githubUser.login,
-            githubAvatarUrl=githubUser.avatarUrl,
-            githubProfilePage=githubUser.htmlUrl,
-        )
         userCollection = mongoDatabase["users"]
-        await userCollection.insert_one(newUser)
-        jwtPayload = {"id": newUser.id}
+        existUser = await userCollection.find_one({"githubId": githubUser.id})
+        if existUser is None:
+            newUser = UserInDb(
+                email=primaryEmail,
+                githubId=githubUser.id,
+                githubUsername=githubUser.login,
+                githubAvatarUrl=githubUser.avatarUrl,
+                githubProfilePage=githubUser.htmlUrl,
+            )
+            newUserDict = newUser.model_dump(by_alias=True)
+            await userCollection.insert_one(newUserDict)
+        jwtPayload = {"id": githubUser.id}
         jwtToken = createJwt(payload=jwtPayload)
         return Token(token=jwtToken, type="Bearer")

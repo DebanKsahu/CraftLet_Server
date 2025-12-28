@@ -1,11 +1,11 @@
+from typing import Annotated
+
 from bson import ObjectId
+from pydantic.functional_validators import BeforeValidator
 
-
-class PyObjectId(ObjectId):
-    @classmethod
-    def __get_validators__(cls):
-        yield cls.validate
-
-    @classmethod
-    def validate(cls, v: str):
-        return ObjectId(v)
+PyObjectId = Annotated[
+    ObjectId,
+    BeforeValidator(
+        lambda value: ObjectId(value) if not isinstance(value, ObjectId) else value
+    ),
+]
