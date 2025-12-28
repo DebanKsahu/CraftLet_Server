@@ -12,6 +12,7 @@ class GithubAuthSettings(BaseModel):
     AUTHORIZE_URL: str
     TOKEN_URL: str
     API_BASE: str
+    FINE_GRAINED_PAT: str
 
 
 class AuthSettings(BaseModel):
