@@ -14,18 +14,17 @@ from app.db.model.user import UserInDb
 authRouter = APIRouter(prefix="/api/v1/auth", tags=["Auth (V1)"])
 
 
-@authRouter.get("/github/login/{frontendState}")
+@authRouter.get("/github/login")
 @public
-async def githubLogin(request: Request, frontendState: str):
+async def githubLogin(request: Request):
     redirectUrl = request.url_for("githubCallback")
     async with createGithubClient(
         redirectUrl=redirectUrl, scope="read:user user:email"
     ) as client:
         authUrl, state = client.create_authorization_url(
-            url=settings.authSettings.githubAuthSettings.AUTHORIZE_URL
+            url=settings.authSettings.githubAuthSettings.AUTHORIZE_URL,
         )
         request.session["oauthServerState"] = state
-        request.session["oauthFrontendState"] = frontendState
     return RedirectResponse(url=authUrl)
 
 
@@ -107,4 +106,4 @@ async def githubCallback(
             await userCollection.insert_one(newUserDict)
         jwtPayload = {"id": githubUser.id}
         jwtToken = createJwt(payload=jwtPayload)
-        return Token(token=jwtToken, type="Bearer")
+        return RedirectResponse(url=f"craftlet_oauth://callback?token={jwtToken}", status_code=302)
