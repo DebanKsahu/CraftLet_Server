@@ -1,10 +1,9 @@
 from fastapi import APIRouter, Depends, HTTPException, Request, status
-from fastapi.responses import RedirectResponse
+from fastapi.responses import HTMLResponse, RedirectResponse
 from motor.motor_asyncio import AsyncIOMotorDatabase
 
 from app.api.v1.dependency import getMongoDatabase
 from app.api.v1.schema.auth.githubAuth import GithubEmail, GithubUser
-from app.api.v1.schema.auth.token import Token
 from app.config import settings
 from app.core.client import createGithubClient
 from app.core.decorator import public
@@ -106,4 +105,42 @@ async def githubCallback(
             await userCollection.insert_one(newUserDict)
         jwtPayload = {"id": githubUser.id}
         jwtToken = createJwt(payload=jwtPayload)
-        return RedirectResponse(url=f"craftlet_oauth://callback?token={jwtToken}", status_code=302)
+        appDeepLink = f"craftlet_oauth://callback?token={jwtToken}"
+        htmlContent = f"""
+        <!DOCTYPE html>
+        <html>
+            <head>
+                <title>Redirecting...</title>
+                <meta name="viewport" content="width=device-width, initial-scale=1.0">
+                <style>
+                    body {{ font-family: sans-serif; text-align: center; padding: 20px; }}
+                    .btn {{
+                        display: inline-block; padding: 10px 20px;
+                        background-color: #007bff; color: white;
+                        text-decoration: none; border-radius: 5px;
+                        margin-top: 20px;
+                    }}
+                </style>
+            </head>
+            <body>
+                <h3>Login Successful!</h3>
+                <p>You are being redirected back to the app.</p>
+                <a href="{appDeepLink}" class="btn">Click here to return to App</a>
+
+                <script>
+                    // Try to redirect immediately
+                    window.location.href = "{appDeepLink}";
+
+                    // Optional: Close the window after a short delay if supported
+                    setTimeout(function() {{
+                        // window.close();
+                    }}, 2000);
+                </script>
+            </body>
+        </html>
+        """
+        response = HTMLResponse(content=htmlContent, status_code=200)
+        response.headers["Cache-Control"] = "no-cache, no-store, must-revalidate"
+        response.headers["Pragma"] = "no-cache"
+        response.headers["Expires"] = "0"
+        return response
