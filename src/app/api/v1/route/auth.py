@@ -125,11 +125,11 @@ async def githubCallback(
             <body>
                 <h3>Login Successful!</h3>
                 <p>You are being redirected back to the app.</p>
-                <a href="{appDeepLink}" class="btn">Click here to return to App</a>
+                <a href={appDeepLink} class="btn">Click here to return to App</a>
 
                 <script>
                     // Try to redirect immediately
-                    window.location.href = "{appDeepLink}";
+                    window.location.replace({appDeepLink});
 
                     // Optional: Close the window after a short delay if supported
                     setTimeout(function() {{
