@@ -40,6 +40,12 @@ class AppSettings(BaseModel):
     JWT_SECRET_KEY: str
     JWT_ALGORITHM: str
 
+class DeeplinkSettings(BaseModel):
+    androidFingerprint: str = Field(alias="android_fingerprint")
+
+class DigitalAssetSettings(BaseModel):
+    deeplinkSettings: DeeplinkSettings = Field(alias="deeplink_settings")
+
 
 class Settings(BaseSettings):
     model_config = SettingsConfigDict(
@@ -52,6 +58,7 @@ class Settings(BaseSettings):
     authSettings: AuthSettings = Field(alias="auth_settings")
     dbSettings: DbSettings = Field(alias="db_settings")
     appSettings: AppSettings = Field(alias="app_settings")
+    digitalAssetSettings: DigitalAssetSettings = Field(alias="digital_asset_settings")
 
 settings = Settings()
 

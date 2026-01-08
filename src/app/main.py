@@ -1,3 +1,4 @@
+from app.digitalAsset import digitalAssetRoute
 from contextlib import asynccontextmanager
 
 from fastapi import FastAPI
@@ -32,3 +33,4 @@ app.add_middleware(
 )
 
 app.include_router(authRouterV1)
+app.include_router(digitalAssetRoute)
