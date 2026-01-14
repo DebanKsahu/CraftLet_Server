@@ -103,7 +103,7 @@ async def githubCallback(
             )
             newUserDict = newUser.model_dump(by_alias=True)
             await userCollection.insert_one(newUserDict)
-        jwtPayload = {"id": githubUser.id}
+        jwtPayload = {"id": githubUser.id, "name": githubUser.login}
         jwtToken = createJwt(payload=jwtPayload)
         appDeepLink = (
             f"https://craftlet-server.onrender.com/androidCallback?token={jwtToken}"
