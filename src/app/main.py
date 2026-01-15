@@ -1,4 +1,3 @@
-from app.digitalAsset import digitalAssetRoute
 from contextlib import asynccontextmanager
 
 from fastapi import FastAPI
@@ -6,8 +5,10 @@ from fastapi.middleware.cors import CORSMiddleware
 from starlette.middleware.sessions import SessionMiddleware
 
 from app.api.v1.route.auth import authRouter as authRouterV1
+from app.api.v1.route.template import templateRouter
 from app.config import settings
 from app.db import closeMongo, configureCollections, connectMongo
+from app.digitalAsset import digitalAssetRoute
 
 
 @asynccontextmanager
@@ -20,9 +21,7 @@ async def lifespan(app: FastAPI):
 
 app = FastAPI(title="CraftLet", lifespan=lifespan)
 
-app.add_middleware(
-    SessionMiddleware, secret_key=settings.appSettings.SESSION_SECRET_KEY
-)
+app.add_middleware(SessionMiddleware, secret_key=settings.appSettings.SESSION_SECRET_KEY)
 
 app.add_middleware(
     CORSMiddleware,
@@ -34,3 +33,4 @@ app.add_middleware(
 
 app.include_router(authRouterV1)
 app.include_router(digitalAssetRoute)
+app.include_router(templateRouter)

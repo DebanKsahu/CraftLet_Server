@@ -17,9 +17,7 @@ authRouter = APIRouter(prefix="/api/v1/auth", tags=["Auth (V1)"])
 @public
 async def githubLogin(request: Request):
     redirectUrl = request.url_for("githubCallback")
-    async with createGithubClient(
-        redirectUrl=redirectUrl, scope="read:user user:email"
-    ) as client:
+    async with createGithubClient(redirectUrl=redirectUrl, scope="read:user user:email") as client:
         authUrl, state = client.create_authorization_url(
             url=settings.authSettings.githubAuthSettings.AUTHORIZE_URL,
         )
@@ -29,16 +27,10 @@ async def githubLogin(request: Request):
 
 @authRouter.get("/github/callback")
 @public
-async def githubCallback(
-    request: Request, mongoDatabase: AsyncIOMotorDatabase = Depends(getMongoDatabase)
-):
+async def githubCallback(request: Request, mongoDatabase: AsyncIOMotorDatabase = Depends(getMongoDatabase)):
     savedOauthState = request.session.get("oauthServerState", None)
     currentOAuthState = request.query_params.get("state", None)
-    if (
-        savedOauthState != currentOAuthState
-        or (savedOauthState is None)
-        or (currentOAuthState is None)
-    ):
+    if savedOauthState != currentOAuthState or (savedOauthState is None) or (currentOAuthState is None):
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
             detail="Invalid OAuth state. Possible CSRF attack or expired session.",
@@ -73,10 +65,7 @@ async def githubCallback(
             )
             primaryEmail = None
             if emailDetails.status_code == 200:
-                emails = [
-                    GithubEmail.model_validate(emailDetail)
-                    for emailDetail in emailDetails.json()
-                ]
+                emails = [GithubEmail.model_validate(emailDetail) for emailDetail in emailDetails.json()]
                 primaryEmailDetail = next(
                     (email for email in emails if email.primary and email.verified),
                     None,
@@ -105,7 +94,5 @@ async def githubCallback(
             await userCollection.insert_one(newUserDict)
         jwtPayload = {"id": githubUser.id, "name": githubUser.login}
         jwtToken = createJwt(payload=jwtPayload)
-        appDeepLink = (
-            f"https://craftlet-server.onrender.com/androidCallback?token={jwtToken}"
-        )
+        appDeepLink = f"https://craftlet-server.onrender.com/androidCallback?token={jwtToken}"
         return RedirectResponse(appDeepLink, status_code=302)

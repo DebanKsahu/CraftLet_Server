@@ -11,9 +11,10 @@ class AuthRoute(APIRoute):
 
         async def customHandler(request: Request):
             endpoint = self.endpoint
-            if getattr(endpoint, "endpointType", EndpointType.PUBLIC):
+            endpointType = getattr(endpoint, "endpointType", EndpointType.PUBLIC)
+            if endpointType == EndpointType.PUBLIC:
                 return await originalHandler(request)
-            elif getattr(endpoint, "endpointType", EndpointType.PROTECTED):
+            elif endpointType == EndpointType.PROTECTED:
                 auth = request.headers.get("authorization")
                 if not auth or not auth.startswith("Bearer "):
                     raise HTTPException(
