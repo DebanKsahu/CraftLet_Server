@@ -1,3 +1,4 @@
+from app.api.v1.schema.template.templateOut import TemplateOut
 import base64
 import json
 import re
@@ -120,6 +121,13 @@ async def deleteExistingTemplate(templateId: ObjectId, mongoDatabase: AsyncIOMot
     if result.deleted_count == 0:
         raise HTTPException(status_code=404, detail="Template Not Found")
     return result.deleted_count
+
+async def getExistingTemplateDetail(templateId: ObjectId, mongoDatabase: AsyncIOMotorDatabase):
+    templateCollection = mongoDatabase.get_collection("templates")
+    result: TemplateOut | None = await templateCollection.find_one(filter={"_id": templateId})
+    if result is None:
+        raise HTTPException(status_code=404, detail="Template Not Found")
+    return result
 
 
 def encodeTemplateCursor(createdAt: datetime, templateId: ObjectId):

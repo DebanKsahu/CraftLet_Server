@@ -6,11 +6,13 @@ from starlette.responses import JSONResponse
 from app.api.v1.dependency import getMongoDatabase
 from app.api.v1.schema.template.templateFilter import TemplateFilter
 from app.api.v1.schema.template.templateIn import TemplateIn
+from app.api.v1.schema.template.templateOut import TemplateOut
 from app.api.v1.schema.template.templatePage import TemplatePage
 from app.api.v1.schema.template.templateUpdate import TemplateUpdate
 from app.api.v1.service.templateService import (
     createNewTemplate,
     deleteExistingTemplate,
+    getExistingTemplateDetail,
     handleTemplateList,
     updateExistingTemplate,
 )
@@ -61,7 +63,7 @@ async def updateTemplate(
     return JSONResponse(content={"message": f"{documentModified} document modified"}, status_code=200)
 
 
-@templateRouter.delete("/deleteTemplate/{templateId}")
+@templateRouter.delete("/deleteTemplate")
 @protected
 async def deleteTemplate(
     templateId: str, request: Request, mongoDatabase: AsyncIOMotorDatabase = Depends(getMongoDatabase)
@@ -70,3 +72,14 @@ async def deleteTemplate(
         templateId=ObjectId(templateId), mongoDatabase=mongoDatabase
     )
     return JSONResponse(content={"message": f"{documentDeleted} document(s) deleted"}, status_code=200)
+
+
+@templateRouter.get("/templateDetail", response_model=TemplateOut)
+@protected
+async def getTemplateDetail(
+    templateId: str, request: Request, mongoDatabase: AsyncIOMotorDatabase = Depends(getMongoDatabase)
+):
+    templateDetail = await getExistingTemplateDetail(
+        templateId=ObjectId(templateId), mongoDatabase=mongoDatabase
+    )
+    return templateDetail
