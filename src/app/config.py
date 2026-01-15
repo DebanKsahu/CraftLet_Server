@@ -12,11 +12,16 @@ class GithubAuthSettings(BaseModel):
     AUTHORIZE_URL: str
     TOKEN_URL: str
     API_BASE: str
+
+class GithubApiSettings(BaseModel):
     FINE_GRAINED_PAT: str
 
 
 class AuthSettings(BaseModel):
     githubAuthSettings: GithubAuthSettings = Field(alias="github_auth_settings")
+
+class ApiSettings(BaseModel):
+    githubApiSettings: GithubApiSettings = Field(alias="github_api_settings")
 
 
 class MongoDbSettings(BaseModel):
@@ -56,6 +61,7 @@ class Settings(BaseSettings):
     )
 
     authSettings: AuthSettings = Field(alias="auth_settings")
+    apiSettings: ApiSettings = Field(alias="api_settings")
     dbSettings: DbSettings = Field(alias="db_settings")
     appSettings: AppSettings = Field(alias="app_settings")
     digitalAssetSettings: DigitalAssetSettings = Field(alias="digital_asset_settings")
